@@ -1,0 +1,25 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 18.130.225.224
+          username: nikunj
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/devops-docker-aws
+            git pull
+            docker stop mywebsite || true
+            docker rm mywebsite || true
+            docker build -t nikunj-site .
+            docker run -d -p 80:80 --name mywebsite nikunj-site
